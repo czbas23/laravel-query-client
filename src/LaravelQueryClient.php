@@ -115,17 +115,31 @@ class LaravelQueryClient implements LaravelQueryClientInterface
             throw new \Exception('Propety model not set.');
         }
         foreach ($query as $commandQuery => $paramQuery) {
-            if($this->hasQuery($commandQuery)){
-                if($this->isRetrievingQuery($commandQuery)){
-                    if($this->canRetrieving($commandQuery)){
-                        $this->setRetrievingQuery($commandQuery, $paramQuery);
-                    }
-                } else {
-                    $this->setConditionalQuery($commandQuery, $paramQuery);
-                }
+            $this->validCommandQuery($commandQuery);
+            $this->validParamQuery($paramQuery);
+            if($this->isRetrievingQuery($commandQuery)){
+                $this->setRetrievingQuery($commandQuery, $paramQuery);
+            } else {
+                $this->setConditionalQuery($commandQuery, $paramQuery);
             }
         }
         return $this;
+    }
+
+    public function validCommandQuery(String $commandQuery)
+    {
+        if(!$this->hasQuery($commandQuery)){
+            throw new \Exception('Command not valid.');
+        }
+        return true;
+    }
+
+    public function validParamQuery($paramQuery)
+    {
+        if(is_null($paramQuery) || is_array($paramQuery)){
+            return true;
+        }
+        throw new \Exception('Parameter not valid.');
     }
 
     public function hasQuery(String $commandQuery)
@@ -174,16 +188,18 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         throw new \Exception('Method not allow with crud.');
     }
 
-    public function setRetrievingQuery(String $commandQuery, $paramQuery)
+    public function setRetrievingQuery(String $commandQuery, $paramQuery=null)
     {
-        if(is_array($paramQuery)){
-            $this->retrievingResult = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
-        } else {
-            $this->retrievingResult = call_user_func(array($this->model, $commandQuery), $paramQuery);
+        if($this->canRetrieving($commandQuery)){
+            if(is_null($paramQuery)){
+                $this->retrievingResult = $this->model->$commandQuery();
+            } else {
+                $this->retrievingResult = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+            }
         }
     }
 
-    public function setConditionalQuery(String $commandQuery, $paramQuery)
+    public function setConditionalQuery(String $commandQuery, $paramQuery=null)
     {
         if(in_array($commandQuery, $this->conditionalQueryRelation)){
             if(is_array($paramQuery)){
@@ -193,23 +209,19 @@ class LaravelQueryClient implements LaravelQueryClientInterface
                             throw new \Exception('Relation not match.');
                         }
                     }
-                } else if (is_string($paramQuery[0])) {
+                    $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+                } else {
                     if(!in_array($paramQuery[0], $this->relation)){
                         throw new \Exception('Relation not match.');
                     }
+                    $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
                 }
-                $this->model = call_user_func_array(array($this->model, $commandQuery), [$paramQuery[0]]);
-            } else if (is_string($paramQuery)) {
-                if(!in_array($paramQuery, $this->relation)){
-                    throw new \Exception('Relation not match.');
-                }
-                $this->model = call_user_func(array($this->model, $commandQuery), $paramQuery);
             }
         } else {
-            if(is_array($paramQuery)){
-                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+            if(is_null($paramQuery)){
+                $this->model = $this->model->$commandQuery();
             } else {
-                $this->model = call_user_func(array($this->model, $commandQuery), $paramQuery);
+                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
             }
         }
     }

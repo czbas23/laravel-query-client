@@ -20,4 +20,6 @@ interface LaravelQueryClientInterface
     public function canRetrieving(String $commandQuery);
     public function setRetrievingQuery(String $commandQuery, $paramQuery);
     public function setConditionalQuery(String $commandQuery, $paramQuery);
+    public function validCommandQuery(String $commandQuery);
+    public function validParamQuery($paramQuery);
 }

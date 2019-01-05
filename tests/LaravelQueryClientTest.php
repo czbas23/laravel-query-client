@@ -125,4 +125,25 @@ class LaravelQueryClientTest extends TestCase
         }
     }
 
+    // /**
+    //  * test whereGroup method.
+    //  *
+    //  * @return void
+    //  */
+    // public function testWhereGroupTest()
+    // {
+    //     // $mock = $this->getMockBuilder(stdClass::class)
+    //     // ->setMethods(['orWhere'])
+    //     // ->getMock();
+    //     // $mock->method('orWhere')
+    //     // ->willReturn($this->returnSelf());
+    //     $whereGroupData = [
+    //         'orWhere' => ['name', 'like', '%test%'],
+    //         'orWhere' => ['color', 'like', '%test%']
+    //     ];
+    //     $this->laravelQueryClient->setModel($mock);
+    //     $this->laravelQueryClient->setConditionalQuery('whereGroup', $whereGroupData);
+    //     $this->assertEquals("select * from model where ( name like '%test%' )", $this->laravelQueryClient->getModel()->toSql());
+    // }
+
 }

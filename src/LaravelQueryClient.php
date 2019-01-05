@@ -28,17 +28,17 @@ class LaravelQueryClient implements LaravelQueryClientInterface
 
     protected $conditionalQueryRelation = ['with', 'has', 'doesntHave', 'withCount'];
 
-    protected $conditionalQueryOptional = ['whereGroup'];
-
     protected $propertyRetrievingQueryList = ['retrievingQueryCreate', 'retrievingQueryRead', 'retrievingQueryUpdate', 'retrievingQueryDelete'];
 
-    protected $propertyConditionalQueryList = ['conditionalQuerySelect', 'conditionalQueryJoin', 'conditionalQueryWhere', 'conditionalQueryOrder', 'conditionalQueryGroup', 'conditionalQueryLimit', 'conditionalQueryRelation', 'conditionalQueryOptional'];
+    protected $propertyConditionalQueryList = ['conditionalQuerySelect', 'conditionalQueryJoin', 'conditionalQueryWhere', 'conditionalQueryOrder', 'conditionalQueryGroup', 'conditionalQueryLimit', 'conditionalQueryRelation'];
 
     protected $propertyQueryList = ['propertyRetrievingQueryList', 'propertyConditionalQueryList'];
 
     protected $crud;
 
     protected $model;
+
+    protected $group = [];
 
     protected $retrievingResult;
 
@@ -104,28 +104,6 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         return $this->model;
     }
 
-    public function getRetrievingResult()
-    {
-        return $this->retrievingResult;
-    }
-
-    public function query(Array $query)
-    {
-        if(!$this->model){
-            throw new \Exception('Propety model not set.');
-        }
-        foreach ($query as $commandQuery => $paramQuery) {
-            $this->validCommandQuery($commandQuery);
-            $this->validParamQuery($paramQuery);
-            if($this->isRetrievingQuery($commandQuery)){
-                $this->setRetrievingQuery($commandQuery, $paramQuery);
-            } else {
-                $this->setConditionalQuery($commandQuery, $paramQuery);
-            }
-        }
-        return $this;
-    }
-
     public function validCommandQuery(String $commandQuery)
     {
         if(!$this->hasQuery($commandQuery)){
@@ -156,21 +134,28 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         return false;
     }
 
+    public function query(Array $query)
+    {
+        if(!$this->model){
+            throw new \Exception('Propety model not set.');
+        }
+        foreach ($query as $query_row) {
+            $commandQuery = $query_row[0] ?? null;
+            $paramQuery = $query_row[1] ?? null;
+            $this->validCommandQuery($commandQuery);
+            $this->validParamQuery($paramQuery);
+            if($this->isRetrievingQuery($commandQuery)){
+                $this->setRetrievingQuery($commandQuery, $paramQuery);
+            } else {
+                $this->setConditionalQuery($commandQuery, $paramQuery);
+            }
+        }
+        return $this;
+    }
+
     public function isRetrievingQuery(String $commandQuery)
     {
         foreach ($this->propertyRetrievingQueryList as $propertySubTypeQuery) {
-            foreach ($this->$propertySubTypeQuery as $query) {
-                if($commandQuery === $query){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public function isConditionalQuery(String $commandQuery)
-    {
-        foreach ($this->propertyConditionalQueryList as $propertySubTypeQuery) {
             foreach ($this->$propertySubTypeQuery as $query) {
                 if($commandQuery === $query){
                     return true;
@@ -188,6 +173,11 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         throw new \Exception('Method not allow with crud.');
     }
 
+    public function getResult()
+    {
+        return $this->retrievingResult;
+    }
+
     public function setRetrievingQuery(String $commandQuery, $paramQuery=null)
     {
         if($this->canRetrieving($commandQuery)){
@@ -199,30 +189,51 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         }
     }
 
+    public function isConditionalQuery(String $commandQuery)
+    {
+        foreach ($this->propertyConditionalQueryList as $propertySubTypeQuery) {
+            foreach ($this->$propertySubTypeQuery as $query) {
+                if($commandQuery === $query){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public function setConditionalQuery(String $commandQuery, $paramQuery=null)
     {
         if(in_array($commandQuery, $this->conditionalQueryRelation)){
-            if(is_array($paramQuery)){
-                if(is_array($paramQuery[0])){
-                    foreach ($paramQuery[0] as $paramQuery_v) {
-                        if(!in_array($paramQuery_v, $this->relation)){
-                            throw new \Exception('Relation not match.');
-                        }
-                    }
-                    $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
-                } else {
-                    if(!in_array($paramQuery[0], $this->relation)){
+            if(is_null($paramQuery)){
+                throw new \Exception('Relation parameter not null.');
+            }
+            if(is_array($paramQuery[0])){
+                foreach ($paramQuery[0] as $paramQuery_v) {
+                    if(!in_array($paramQuery_v, $this->relation)){
                         throw new \Exception('Relation not match.');
                     }
-                    $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
                 }
+                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+            } else if (is_string($paramQuery[0])) {
+                if(!in_array($paramQuery[0], $this->relation)){
+                    throw new \Exception('Relation not match.');
+                }
+                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
             }
         } else {
             if(is_null($paramQuery)){
-                $this->model = $this->model->$commandQuery();
+                $this->model->$commandQuery();
             } else {
-                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+                if(in_array($commandQuery, ['where', 'orWhere']) && $this->hasQuery($paramQuery[0][0])){
+                    $this->model = $this->model->$commandQuery(function ($model) use ($paramQuery) {
+                        $this->model = $model;
+                        $this->query($paramQuery);
+                    });
+                } else {
+                    $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+                }
             }
         }
     }
+
 }

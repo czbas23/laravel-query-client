@@ -12,14 +12,14 @@ interface LaravelQueryClientInterface
     public function getCrud();
     public function setModel($model);
     public function getModel();
-    public function getRetrievingResult();
-    public function query(Array $query);
-    public function hasQuery(String $commandQuery);
-    public function isRetrievingQuery(String $commandQuery);
-    public function isConditionalQuery(String $commandQuery);
-    public function canRetrieving(String $commandQuery);
-    public function setRetrievingQuery(String $commandQuery, $paramQuery);
-    public function setConditionalQuery(String $commandQuery, $paramQuery);
     public function validCommandQuery(String $commandQuery);
     public function validParamQuery($paramQuery);
+    public function hasQuery(String $commandQuery);
+    public function query(Array $query);
+    public function isRetrievingQuery(String $commandQuery);
+    public function canRetrieving(String $commandQuery);
+    public function getResult();
+    public function setRetrievingQuery(String $commandQuery, $paramQuery=null);
+    public function isConditionalQuery(String $commandQuery);
+    public function setConditionalQuery(String $commandQuery, $paramQuery=null);
 }

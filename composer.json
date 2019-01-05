@@ -32,10 +32,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Czbas23\\LaravelQueryClient\\ServiceProvider"
+                "Czbas23\\LaravelQueryClient\\Providers\\LaravelQueryClientProvider"
             ],
             "aliases": {
-                "PDF": "Czbas23\\LaravelQueryClient\\Facade"
+                "LaravelQueryClient": "Czbas23\\LaravelQueryClient\\Facades\\LaravelQueryClientFacade"
             }
         }
     }    

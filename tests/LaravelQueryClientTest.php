@@ -116,7 +116,7 @@ class LaravelQueryClientTest extends TestCase
         $mock->method('with')
         ->willReturn('foo');
         $this->laravelQueryClient->setModel($mock)->setRelation(['comments']);
-        $this->laravelQueryClient->setConditionalQuery('with', 'comments');
+        $this->laravelQueryClient->setConditionalQuery('with', ['comments']);
         $this->assertEquals('foo', $this->laravelQueryClient->getModel());
         try {
             $this->laravelQueryClient->setConditionalQuery('with', 'tags');

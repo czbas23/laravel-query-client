@@ -26,15 +26,15 @@ Basic for use
         'whereIn' => ['id', [1, 2, 3]],
     ])
     ->getModel();
-    dd($User->first()->toArray());
+    dd($User->get()->toArray());
 
 Query with relationship
 
     $countUser = \LaravelQueryClient::setModel(new \App\User)
     ->setCrud('read')
-    ->pushRelation('user_type')
+    ->pushRelation('posts')
     ->query([
-        'with' => ['user_type'],
+        'has' => ['posts'],
         'count' => null,
     ])
     ->getRetrievingResult();

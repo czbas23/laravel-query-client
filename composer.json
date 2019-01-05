@@ -1,0 +1,42 @@
+{
+    "name": "czbas23/laravel-query-client",
+    "license": "MIT",
+    "keywords": ["laravel", "query", "client"],
+    "authors": [
+        {
+            "name": "czbas23",
+            "email": "czbas23@gmail.com"
+        }
+    ],
+    "require": {
+        "php" : ">=7.0",
+        "illuminate/database": "5.5.x|5.6.x|5.7.x",
+        "illuminate/support": "5.5.x|5.6.x|5.7.x"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Czbas23\\LaravelQueryClient\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Czbas23\\LaravelQueryClient\\Tests\\": "Tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Czbas23\\LaravelQueryClient\\ServiceProvider"
+            ],
+            "aliases": {
+                "PDF": "Czbas23\\LaravelQueryClient\\Facade"
+            }
+        }
+    }    
+}

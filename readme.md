@@ -23,10 +23,23 @@ Basic for use
     $User = \LaravelQueryClient::setModel(new \App\User)
     ->setCrud('read')
     ->query([
-        'whereIn' => ['id', [1, 2, 3]],
+        ['where', ['id', 1]],
+        ['where', [
+            ['orWhere', ['name', 'like', '%Foo%']],
+            ['orWhere', ['name', 'like', '%Bar%']]
+        ]],
+        ['get']
     ])
-    ->getModel();
-    dd($User->get()->toArray());
+    ->getResult();
+
+    Equals
+
+    $User = \App\User::where('id', 1)
+    ->where(function ($query) {
+        $query->orWhere('name', 'like', '%Foo%');
+        $query->orWhere('name', 'like', '%Bar%');
+    })
+    ->get();
 
 Query with relationship
 
@@ -34,11 +47,37 @@ Query with relationship
     ->setCrud('read')
     ->pushRelation('posts')
     ->query([
-        'has' => ['posts'],
-        'count' => null,
+        ['has', ['posts']],
+        ['count']
     ])
-    ->getRetrievingResult();
-    dd($countUser);
+    ->getResult();
+
+    Equals
+
+    $countUser = \App\User::has('posts')->count();
+
+Insert data
+
+    $result = \LaravelQueryClient::setModel(new \App\User)
+    ->setCrud('create')
+    ->query([
+        ['create', [
+            [
+                'name' => 'Foo Bar',
+                'email' => 'example@mail.com',
+                'password' => bcrypt('secret'),
+            ]
+        ]],
+    ])
+    ->getResult();
+
+    Equals
+
+    $result = \App\User::create([
+        'name' => 'Foo Bar',
+        'email' => 'example@mail.com',
+        'password' => bcrypt('secret'),
+    ]);
 
 ### License
 

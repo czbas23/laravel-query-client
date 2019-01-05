@@ -187,8 +187,14 @@ class LaravelQueryClient implements LaravelQueryClientInterface
     {
         if(in_array($commandQuery, $this->conditionalQueryRelation)){
             if(is_array($paramQuery)){
-                foreach ($paramQuery[0] as $paramQuery_v) {
-                    if(!in_array($paramQuery_v, $this->relation)){
+                if(is_array($paramQuery[0])){
+                    foreach ($paramQuery[0] as $paramQuery_v) {
+                        if(!in_array($paramQuery_v, $this->relation)){
+                            throw new \Exception('Relation not match.');
+                        }
+                    }
+                } else if (is_string($paramQuery[0])) {
+                    if(!in_array($paramQuery[0], $this->relation)){
                         throw new \Exception('Relation not match.');
                     }
                 }

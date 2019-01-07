@@ -18,7 +18,7 @@ class LaravelQueryClient implements LaravelQueryClientInterface
 
     protected $conditionalQueryJoin = ['join', 'joinWhere', 'joinSub', 'leftJoin', 'leftJoinWhere', 'leftJoinSub', 'rightJoin', 'rightJoinWhere', 'rightJoinSub', 'crossJoin', 'newJoinClause'];
 
-    protected $conditionalQueryWhere = ['where', 'orWhere', 'whereBetween', 'whereNotBetween', 'whereIn', 'whereNotIn', 'whereNull', 'whereNotNull', 'whereDate', 'whereMonth', 'whereDay', 'whereYear', 'whereTime', 'whereColumn', 'whereJsonContains', 'whereJsonLength', 'withTrashed', 'onlyTrashed'];
+    protected $conditionalQueryWhere = ['where', 'orWhere', 'whereBetween', 'whereNotBetween', 'whereIn', 'whereNotIn', 'whereNull', 'whereNotNull', 'whereDate', 'whereMonth', 'whereDay', 'whereYear', 'whereTime', 'whereColumn', 'whereJsonContains', 'whereJsonLength', 'withTrashed', 'onlyTrashed', 'wherePivot'];
 
     protected $conditionalQueryOrder = ['orderBy', 'latest', 'oldest', 'inRandomOrder'];
 

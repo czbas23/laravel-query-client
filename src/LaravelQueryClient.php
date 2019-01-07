@@ -26,7 +26,7 @@ class LaravelQueryClient implements LaravelQueryClientInterface
 
     protected $conditionalQueryLimit = ['skip', 'take', 'offset', 'limit'];
 
-    protected $conditionalQueryRelation = ['with', 'has', 'doesntHave', 'withCount'];
+    protected $conditionalQueryRelation = ['with', 'has', 'doesntHave', 'withCount', 'whereHas'];
 
     protected $propertyRetrievingQueryList = ['retrievingQueryCreate', 'retrievingQueryRead', 'retrievingQueryUpdate', 'retrievingQueryDelete'];
 
@@ -213,11 +213,23 @@ class LaravelQueryClient implements LaravelQueryClientInterface
                         throw new \Exception('Relation not match.');
                     }
                 }
-                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
             } else if (is_string($paramQuery[0])) {
                 if(!in_array($paramQuery[0], $this->relation)){
                     throw new \Exception('Relation not match.');
                 }
+            }
+            if($commandQuery === 'whereHas'){
+                if(!is_string($paramQuery[0])){
+                    throw new \Exception('Command whereHas argument 0 must string.');
+                }
+                if(!is_array($paramQuery[1])){
+                    throw new \Exception('Command whereHas argument 1 must array.');
+                }
+                $this->model = $this->model->whereHas($paramQuery[0], function ($model) use ($paramQuery) {
+                    $this->model = $model;
+                    $this->query($paramQuery[1]);
+                });
+            } else {
                 $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
             }
         } else {

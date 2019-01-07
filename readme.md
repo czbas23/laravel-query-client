@@ -8,7 +8,7 @@ Require this package in your composer.json and update composer.
 
 ### Laravel 5.x:
 
-After updating composer, add the ServiceProvider to the providers array in config/app.php
+In Laravel 5.5 or more than the service provider will automatically get registered. In older versions of the framework just add the service provider in config/app.php file:
 
     Czbas23\LaravelQueryClient\Providers\LaravelQueryClientProvider::class,
 

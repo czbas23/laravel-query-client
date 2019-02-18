@@ -71,6 +71,14 @@ class LaravelQueryClient implements LaravelQueryClientInterface
         return $this->relation;
     }
 
+    public function validRelation(String $relation)
+    {
+        if(!in_array($relation, $this->relation)){
+            throw new \Exception('Relation not match.');
+        }
+        return true;
+    }
+
     public function setCrud(String $crud)
     {
         $crud = strtolower($crud);
@@ -207,30 +215,30 @@ class LaravelQueryClient implements LaravelQueryClientInterface
             if(is_null($paramQuery)){
                 throw new \Exception('Relation parameter not null.');
             }
-            if(is_array($paramQuery[0])){
-                foreach ($paramQuery[0] as $paramQuery_v) {
-                    if(!in_array($paramQuery_v, $this->relation)){
-                        throw new \Exception('Relation not match.');
-                    }
+            if($commandQuery === 'with' || $commandQuery === 'withCount'){
+                if(is_string($paramQuery[0])){
+                    $this->validRelation($paramQuery[0]);
+                    $this->model = $this->model->with($paramQuery[0]);
+                } else if (is_array($paramQuery[0])){
+                    $this->model = call_user_func_array(array($this->model, $commandQuery), [$this->setDataRelation($paramQuery[0])]);
                 }
-            } else if (is_string($paramQuery[0])) {
-                if(!in_array($paramQuery[0], $this->relation)){
-                    throw new \Exception('Relation not match.');
+            } else if($commandQuery === 'has' || $commandQuery === 'doesntHave'){
+                if(!is_string($paramQuery[0])){
+                    throw new \Exception('Command whereHas argument 0 must string.');
                 }
-            }
-            if($commandQuery === 'whereHas'){
+                $this->validRelation($paramQuery[0]);
+                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+            } else if($commandQuery === 'whereHas' || $commandQuery === 'doesntHave'){
                 if(!is_string($paramQuery[0])){
                     throw new \Exception('Command whereHas argument 0 must string.');
                 }
                 if(!is_array($paramQuery[1])){
                     throw new \Exception('Command whereHas argument 1 must array.');
                 }
-                $this->model = $this->model->whereHas($paramQuery[0], function ($model) use ($paramQuery) {
+                $this->model = call_user_func_array(array($this->model, $commandQuery), [$paramQuery[0], function ($model) use ($paramQuery) {
                     $this->model = $model;
                     $this->query($paramQuery[1]);
-                });
-            } else {
-                $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
+                }]);
             }
         } else {
             if(is_null($paramQuery)){
@@ -246,6 +254,24 @@ class LaravelQueryClient implements LaravelQueryClientInterface
                 }
             }
         }
+    }
+
+    private function setDataRelation(Array $arrRelation)
+    {
+        $dataRelation = [];
+        foreach ($arrRelation as $key => $value) {
+            if(is_string($value)){
+                $this->validRelation($value);
+                $dataRelation[] = $value;
+            } else if (is_array($value) && is_string($key)) {
+                $this->validRelation($key);
+                $dataRelation[$key] = function ($model) use ($value) {
+                    $this->model = $model;
+                    $this->query($value);
+                };
+            }
+        }
+        return $dataRelation;
     }
 
 }

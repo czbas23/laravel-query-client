@@ -26,7 +26,7 @@ class LaravelQueryClient implements LaravelQueryClientInterface
 
     protected $conditionalQueryLimit = ['skip', 'take', 'offset', 'limit'];
 
-    protected $conditionalQueryRelation = ['with', 'has', 'doesntHave', 'withCount', 'whereHas'];
+    protected $conditionalQueryRelation = ['with', 'has', 'doesntHave', 'withCount', 'whereHas', 'orWhereHas'];
 
     protected $propertyRetrievingQueryList = ['retrievingQueryCreate', 'retrievingQueryRead', 'retrievingQueryUpdate', 'retrievingQueryDelete'];
 
@@ -224,16 +224,16 @@ class LaravelQueryClient implements LaravelQueryClientInterface
                 }
             } else if($commandQuery === 'has' || $commandQuery === 'doesntHave'){
                 if(!is_string($paramQuery[0])){
-                    throw new \Exception('Command whereHas argument 0 must string.');
+                    throw new \Exception("Command $commandQuery argument 0 must string.");
                 }
                 $this->validRelation($paramQuery[0]);
                 $this->model = call_user_func_array(array($this->model, $commandQuery), $paramQuery);
-            } else if($commandQuery === 'whereHas' || $commandQuery === 'doesntHave'){
+            } else if($commandQuery === 'whereHas' || $commandQuery === 'orWhereHas' || $commandQuery === 'doesntHave'){
                 if(!is_string($paramQuery[0])){
-                    throw new \Exception('Command whereHas argument 0 must string.');
+                    throw new \Exception("Command $commandQuery argument 0 must string.");
                 }
                 if(!is_array($paramQuery[1])){
-                    throw new \Exception('Command whereHas argument 1 must array.');
+                    throw new \Exception("Command $commandQuery argument 1 must array.");
                 }
                 $this->model = call_user_func_array(array($this->model, $commandQuery), [$paramQuery[0], function ($model) use ($paramQuery) {
                     $this->model = $model;
